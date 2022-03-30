@@ -1,7 +1,7 @@
 var SerialPort = require('serialport');
 var xbee_api = require('xbee-api');
 var C = xbee_api.constants;
-var storage = require("./storage")
+//var storage = require("./storage")
 require('dotenv').config()
 
 
@@ -12,7 +12,7 @@ var xbeeAPI = new xbee_api.XBeeAPI({
 });
 
 let serialport = new SerialPort(SERIAL_PORT, {
-  baudRate: process.env.SERIAL_BAUDRATE || 9600,
+  numberbaudRate:  9600,
 }, function (err) {
   if (err) {
     return console.log('Error: ', err.message)
@@ -25,7 +25,7 @@ xbeeAPI.builder.pipe(serialport);
 serialport.on("open", function () {
   var frame_obj = { // AT Request to be sent
     type: C.FRAME_TYPE.AT_COMMAND,
-    command: "NI",
+    command: "D0",
     commandParameter: [],
   };
 
@@ -61,13 +61,33 @@ xbeeAPI.parser.on("data", function (frame) {
   if (C.FRAME_TYPE.NODE_IDENTIFICATION === frame.type) {
     // let dataReceived = String.fromCharCode.apply(null, frame.nodeIdentifier);
     console.log("NODE_IDENTIFICATION");
-    storage.registerSensor(frame.remote64)
+    //storage.registerSensor(frame.remote64)
 
   } else if (C.FRAME_TYPE.ZIGBEE_IO_DATA_SAMPLE_RX === frame.type) {
 
     console.log("ZIGBEE_IO_DATA_SAMPLE_RX")
-    console.log(frame.analogSamples.AD0)
-    storage.registerSample(frame.remote64,frame.analogSamples.AD0 )
+    if(frame.digitalSamples.DIO0 == 1 && frame.digitalSamples.DIO1 == 1){
+      console.log("appuyé")
+
+      var frame_obj = { // AT Request to be sent
+        type: C.FRAME_TYPE.AT_COMMAND,
+        command: "D0",
+        commandParameter: [C.PIN_MODE.D0.DISABLED],
+      };
+    
+      xbeeAPI.builder.write(frame_obj);
+    }
+    else{
+      console.log("libéré")
+      var frame_obj = { // AT Request to be sent
+        type: C.FRAME_TYPE.AT_COMMAND,
+        command: "D0",
+        commandParameter: [C.PIN_MODE.D0.DIGITAL_OUTPUT_LOW],
+      };
+    
+      xbeeAPI.builder.write(frame_obj);
+    }
+    //storage.registerSample(frame.remote64,frame.analogSamples.AD0 )
 
   } else if (C.FRAME_TYPE.REMOTE_COMMAND_RESPONSE === frame.type) {
     console.log("REMOTE_COMMAND_RESPONSE")

@@ -4,6 +4,8 @@ const Command = require('./commands')
 const C = xbee_api.constants;
 const storage = require('./storage.js')
 require('dotenv').config()
+const http = require('http')
+const Server = require('socket.io')
 
 const SERIAL_PORT = process.env.SERIAL_PORT;
 
@@ -30,6 +32,23 @@ serialport.on("open", function () {
 // All frames parsed by the XBee will be emitted here
 
 //storage.listSensors().then((sensors) => sensors.forEach((sensor) => console.log(sensor.data())))
+
+const httpServer = http.createServer();
+const io = new Server(httpServer, {
+  // options
+});
+console.log("Server started");
+
+io.on("connection", (socket) => {
+  console.log("a user connected");
+  socket.on("test", () => {
+    console.log("user disconnected");
+  });
+});
+
+console.log("listening on port 3000");
+
+httpServer.listen(3000);
 
 xbeeAPI.parser.on("data", function (frame) {
 
@@ -65,3 +84,4 @@ xbeeAPI.parser.on("data", function (frame) {
   }
 
 });
+

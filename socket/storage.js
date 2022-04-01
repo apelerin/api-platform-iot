@@ -147,7 +147,7 @@ module.exports.addColorToSequence = async function (color, triggerCommands) {
 }
 
 function getRandomColor() {
-  const colors = ['Rouge', 'Bleu', 'Jaune', 'Noir', 'Blanc'];
+  const colors = ['Bleu', 'Jaune', 'Noir', 'Blanc'];
   const randomIndex = Math.floor(Math.random() * colors.length);
   return colors[randomIndex];
 }

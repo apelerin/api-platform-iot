@@ -24,7 +24,3 @@ module.exports = {
     commandParameter: [C.PIN_MODE.D1.DIGITAL_OUTPUT_HIGH],
   },
 }
-
-module.exports.test1 = function () {
-
-}

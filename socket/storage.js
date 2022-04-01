@@ -85,6 +85,24 @@ module.exports.observeLaunchingGame = function (func) {
   })
 }
 
+module.exports.isGameInProgress = function () {
+
+  const docRef = db.collection('currentGame').doc('state');
+  let isGameInProgress;
+  docRef.get().then((snapshot) => {
+    isGameInProgress = snapshot.data().gameInProgress;
+  })
+  return isGameInProgress
+}
+
+module.exports.switchGameInProgressToFalse = function () {
+
+  const docRef = db.collection('currentGame').doc('state');
+  docRef.update({
+    gameInProgress: false,
+  })
+}
+
 module.exports.registerColorSequence = async function () {
   const listColorSequence = [];
   for (let i = 0; i < 6; i++) {
@@ -98,21 +116,38 @@ module.exports.registerColorSequence = async function () {
   });
 }
 
-module.exports.addColorToSequence = async function (color) {
+module.exports.addColorToSequence = async function (color, triggerCommands) {
   const docRefActiveButtons = db.collection('currentGame').doc('active_buttons');
   const docRefSoluce = db.collection('currentGame').doc('soluce');
 
   await docRefActiveButtons.get().then((snapshot) => {
+    console.log(snapshot.data().buttonList);
     const buttonList = snapshot.data().buttonList;
-    buttonList.push(color);
+    const index = buttonList.indexOf("");
+    buttonList[index] = color;
+    console.log("buttonList", buttonList);
     docRefActiveButtons.update({
       "buttonList": buttonList
     });
+    if (buttonList[5] !== "") {
+      docRefSoluce.get().then((snapshot) => {
+        const soluce = snapshot.data().buttonList;
+        if (buttonList.toString() === soluce.toString()) {
+          docRefSoluce.update({
+            "buttonList": ["", "", "", "", "", ""]
+          });
+          triggerCommands();
+        }
+        docRefActiveButtons.update({
+          "buttonList": ["", "", "", "", "", ""]
+        });
+      })
+    }
   });
 }
 
 function getRandomColor() {
-  const colors = ['red', 'blue', 'green', 'yellow', 'black', 'white'];
+  const colors = ['Rouge', 'Bleu', 'Jaune', 'Noir', 'Blanc'];
   const randomIndex = Math.floor(Math.random() * colors.length);
   return colors[randomIndex];
 }

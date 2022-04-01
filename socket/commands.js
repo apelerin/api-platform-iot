@@ -13,4 +13,18 @@ module.exports = {
     command: "NI",
     commandParameter: [],
   },
+  commandATLowD01: {
+    type: C.FRAME_TYPE.AT_COMMAND,
+    command: "D1",
+    commandParameter: [C.PIN_MODE.D1.DIGITAL_OUTPUT_LOW],
+  },
+  commandATHighD01: {
+    type: C.FRAME_TYPE.AT_COMMAND,
+    command: "D1",
+    commandParameter: [C.PIN_MODE.D1.DIGITAL_OUTPUT_HIGH],
+  },
+}
+
+module.exports.test1 = function () {
+
 }
